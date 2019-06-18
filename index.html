@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>monitor pm2 log</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="//cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            <span>process list</span>
+            <ul>
+                <li v-for="pc of processList">
+                    <span>{{pc.name}}</span>
+                    <button @click="monitorLog(pc.name)">monitor log</button>
+                </li>
+            </ul>
+        </div>
+        <div class="log">
+            <span >{{logContent}}</span>
+        </div>
+    </div>
+</body>
+
+</html>
+<script>
+new Vue({
+    el: "#app",
+    data: {
+        client: null,
+        processList: [],
+        logContent: ''
+    },
+    methods: {
+        connect() {
+            let client = this.client = io.connect('http://127.0.0.1:8000', {
+                path: '/backend/io'
+            });
+            this.registEventHandle();
+            this.sendPM2List();
+        },
+        registEventHandle() {
+            this.client.on('message', (message) => {
+                console.log('IO [Recive]:', message.event, JSON.stringify(message));
+                switch (message.event) {
+                    case 'pm2-list':
+                        {
+                            this.processList = message.data;
+                            break;
+                        }
+                    case 'pm2-log':
+                        {
+                            this.logContent += message.data;
+                            break;
+                        }
+                }
+            })
+        },
+        sendPM2List() {
+            this.send({ event: 'pm2-list' });
+        },
+        sendPM2Log(name) {
+            this.send({ event: 'monitor-pm2-log', name });
+        },
+        send(message) {
+            console.log('IO [Send]:', message.event, JSON.stringify(message));
+            this.client.send(message)
+        },
+        monitorLog(name) {
+            this.logContent = ''
+            this.sendPM2Log(name);
+        }
+    },
+    created() {
+        this.connect();
+    }
+})
+</script>
+<style>
+.log {
+  border: 1px solid #ccc;
+  height: 300px;
+  padding: 0.5em;
+  overflow: hidden;
+  position: relative;
+  overflow-y: scroll;
+}
+
+.log span {
+  white-space: pre-line;
+}
+</style>

@@ -1,0 +1,20 @@
+{
+  "name": "monitor-pm2-log-web-todo",
+  "version": "0.0.1",
+  "description": "monitor pm2 log in browser",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "pm2",
+    "log",
+    "socket.io"
+  ],
+  "author": "Cr.",
+  "license": "MIT",
+  "dependencies": {
+    "pm2": "^3.5.1",
+    "socket.io": "^2.2.0"
+  }
+}
